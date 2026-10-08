@@ -1,0 +1,3887 @@
+{
+  "$schema": "https://raw.githubusercontent.com/warOnSaaS/suite/main/packages/tools/tools.schema.json",
+  "app": "decks",
+  "version": 1,
+  "tools": [
+    {
+      "name": "decks.list_decks",
+      "title": "List decks",
+      "description": "The team's decks, most recently changed first, with slide counts. query finds words in titles and slides.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "include_archived": {
+            "type": "boolean"
+          },
+          "covers": {
+            "type": "boolean",
+            "description": "Also return each deck's first slide and theme, to draw a cover"
+          }
+        },
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "decks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "slides": {
+                  "type": "number"
+                },
+                "updated_at": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "title",
+                "slides",
+                "updated_at"
+              ],
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "decks"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.get_deck",
+      "title": "Open a deck",
+      "description": "A whole deck: title, theme, brand, linked records, and every slide with its layout, words, blocks and speaker notes. Use it before changing a deck you did not just make.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          }
+        },
+        "required": [
+          "deck"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "theme": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true
+          },
+          "slides": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "number": {
+                  "type": "number"
+                },
+                "layout": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "blocks": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "t": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "t"
+                    ],
+                    "additionalProperties": true
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "number",
+                "layout",
+                "title",
+                "blocks"
+              ],
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "theme",
+          "slides"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.get_slide",
+      "title": "Open a slide",
+      "description": "One slide: its layout, words, blocks (with their ids, to change one) and speaker notes.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "A slide: its id (s_...) or its number, 1 being the first"
+          }
+        },
+        "required": [
+          "deck",
+          "slide"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "number": {
+            "type": "number"
+          },
+          "layout": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "t": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "t"
+              ],
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "layout",
+          "title",
+          "blocks"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.list_layouts",
+      "title": "Layouts and blocks",
+      "description": "Every slide layout (with the fields and block slots it has) and every block type (with its fields and an example). Read this once before building a deck.",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "layouts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "t": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "t"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "tips": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "layouts",
+          "blocks",
+          "tips"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.list_themes",
+      "title": "Themes",
+      "description": "Every look a deck can have: the colour schemes (each with a light and dark mode), corners, faces, surfaces, density, ready presets, and the brand options (logo, accent colour, fonts).",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "schemes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "schemes"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.list_comments",
+      "title": "Comments",
+      "description": "Comments on a deck (or on one slide), with replies, oldest first. Resolved ones are marked.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "A slide: its id (s_...) or its number, 1 being the first"
+          },
+          "open_only": {
+            "type": "boolean",
+            "description": "Leave out resolved comments"
+          }
+        },
+        "required": [
+          "deck"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "comments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "string"
+                },
+                "slide": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "author": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "additionalProperties": true
+                }
+              },
+              "required": [
+                "id",
+                "body",
+                "slide",
+                "author"
+              ],
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "comments"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.list_activity",
+      "title": "What changed",
+      "description": "Recent changes to a deck (or to every deck when none is given): who did what, and whether it was a person or an AI app.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          }
+        },
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "activity": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "by": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "type",
+                "by"
+              ],
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "activity"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.get_changes",
+      "title": "Catch up",
+      "description": "The changes to a deck that a copy with this state vector has not seen, as a Yjs update. Editors use it after a dropped connection.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "state_vector": {
+            "type": "string",
+            "description": "Base64 Yjs state vector; leave out for the whole deck"
+          }
+        },
+        "required": [
+          "deck"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "update": {
+            "type": "string"
+          },
+          "state_vector": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "update",
+          "state_vector"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "hidden": true,
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.get_settings",
+      "title": "Settings",
+      "description": "You, your team, how this server signs people in and stores files, and your own preferences.",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "me": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true
+          },
+          "team": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "me",
+          "team"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.list_people",
+      "title": "People",
+      "description": "Everyone on the team and their role.",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "people": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "role"
+              ],
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "people"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.list_shares",
+      "title": "Share links",
+      "description": "The live view and embed links of a deck.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          }
+        },
+        "required": [
+          "deck"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "shares": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "url"
+              ],
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "shares"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.preview_slide",
+      "title": "Look at a slide",
+      "description": "A picture (PNG) of one slide as it will look when presented, so you can check your work: text that runs over, a chart that reads badly, an image that does not load.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "A slide: its id (s_...) or its number, 1 being the first"
+          }
+        },
+        "required": [
+          "deck",
+          "slide"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "slide": {
+            "type": "string"
+          },
+          "number": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "image_base64": {
+            "type": "string"
+          },
+          "mime": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "slide",
+          "number",
+          "width",
+          "height",
+          "image_base64",
+          "mime"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.create_deck",
+      "title": "New deck",
+      "description": "Make a deck. Give it a title, and optionally a theme, a brand and its slides all at once (or add slides after with decks.add_slide). Returns the deck with slide and block ids.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string"
+          },
+          "theme": {
+            "type": "object",
+            "properties": {
+              "preset": {
+                "type": "string",
+                "enum": [
+                  "clean",
+                  "ops",
+                  "midnight",
+                  "editorial",
+                  "calm",
+                  "garden",
+                  "playful",
+                  "war_room"
+                ],
+                "description": "A ready look: clean, ops, midnight, editorial, calm, garden, playful, war_room. Other options given with it override it."
+              },
+              "scheme": {
+                "type": "string",
+                "enum": [
+                  "ops",
+                  "midnight",
+                  "neutral",
+                  "ember",
+                  "tide",
+                  "sage",
+                  "arcade",
+                  "warroom"
+                ],
+                "description": "Colour scheme: ops, midnight, neutral, ember, tide, sage, arcade, warroom"
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "light",
+                  "dark"
+                ]
+              },
+              "shape": {
+                "type": "string",
+                "enum": [
+                  "sharp",
+                  "soft",
+                  "round"
+                ],
+                "description": "Corners: sharp, soft or round"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "grotesk",
+                  "mono",
+                  "editorial",
+                  "humanist",
+                  "pixel",
+                  "system"
+                ],
+                "description": "Faces: grotesk, mono, editorial (serif), humanist, pixel or system"
+              },
+              "surface": {
+                "type": "string",
+                "enum": [
+                  "flat",
+                  "bordered",
+                  "elevated",
+                  "glass"
+                ],
+                "description": "How cards sit: flat, bordered, elevated or glass"
+              },
+              "density": {
+                "type": "string",
+                "enum": [
+                  "compact",
+                  "comfortable",
+                  "spacious"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "brand": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true,
+            "description": "logo, accent, on_accent, font, display, fonts_href, footer (see decks.list_themes)"
+          },
+          "slides": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "layout": {
+                  "type": "string",
+                  "enum": [
+                    "title",
+                    "section",
+                    "content",
+                    "two_column",
+                    "image_left",
+                    "image_right",
+                    "full_image",
+                    "big_number",
+                    "quote",
+                    "closing",
+                    "blank"
+                  ],
+                  "description": "The layout: title, section, content, two_column, image_left, image_right, full_image, big_number, quote, closing, blank. decks.list_layouts explains each."
+                },
+                "kicker": {
+                  "type": "string",
+                  "description": "A small line above the title"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "subtitle": {
+                  "type": "string",
+                  "description": "A line under the title"
+                },
+                "blocks": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "t": {
+                        "type": "string",
+                        "enum": [
+                          "text",
+                          "heading",
+                          "bullets",
+                          "quote",
+                          "stats",
+                          "cards",
+                          "table",
+                          "chart",
+                          "image",
+                          "steps",
+                          "timeline",
+                          "checklist",
+                          "callout",
+                          "chat",
+                          "score",
+                          "kv",
+                          "button"
+                        ],
+                        "description": "The block type"
+                      },
+                      "slot": {
+                        "type": "string",
+                        "description": "Where on the slide: main, or left and right on two_column"
+                      }
+                    },
+                    "required": [
+                      "t"
+                    ],
+                    "additionalProperties": true,
+                    "description": "A block. t is one of text, heading, bullets, quote, stats, cards, table, chart, image, steps, timeline, checklist, callout, chat, score, kv, button; its other fields depend on t (decks.list_layouts lists them). Example: { \"t\": \"stats\", \"items\": [{ \"value\": \"38%\", \"label\": \"Growth\" }] }"
+                  },
+                  "maxItems": 12,
+                  "description": "The slide's blocks, in order. Keep slides light: one to three blocks."
+                },
+                "notes": {
+                  "type": "string",
+                  "description": "Speaker notes: what to say, only the presenter sees them"
+                },
+                "image": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                          "description": "An https address or a file url from decks.upload_file"
+                        },
+                        "alt": {
+                          "type": "string"
+                        },
+                        "fit": {
+                          "type": "string",
+                          "enum": [
+                            "cover",
+                            "contain"
+                          ]
+                        },
+                        "position": {
+                          "type": "string",
+                          "description": "Which part to keep in view, like \"center top\""
+                        }
+                      },
+                      "required": [
+                        "url"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "The picture for image_left, image_right and full_image layouts"
+                },
+                "bg": {
+                  "type": "string",
+                  "enum": [
+                    "default",
+                    "alt",
+                    "accent",
+                    "inverse"
+                  ],
+                  "description": "Background: default, alt (a card colour), accent, or inverse (the opposite mode)"
+                },
+                "hidden": {
+                  "type": "boolean",
+                  "description": "Hidden slides are skipped when presenting and exporting"
+                }
+              },
+              "additionalProperties": false
+            },
+            "maxItems": 60
+          },
+          "from_example": {
+            "type": "string",
+            "description": "Start from an example deck (its id or title) instead of empty"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "theme": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true
+          },
+          "slides": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "number": {
+                  "type": "number"
+                },
+                "layout": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "blocks": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "t": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "t"
+                    ],
+                    "additionalProperties": true
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "number",
+                "layout",
+                "title",
+                "blocks"
+              ],
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "theme",
+          "slides"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.deck.created"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.update_deck",
+      "title": "Rename a deck",
+      "description": "Change a deck's title or description.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "deck"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "slides": {
+            "type": "number"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "slides",
+          "updated_at"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.deck.updated"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.duplicate_deck",
+      "title": "Duplicate a deck",
+      "description": "Copy a whole deck, slides, theme and notes, under a new title. Comments and share links stay with the original.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "deck"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "theme": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true
+          },
+          "slides": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "number": {
+                  "type": "number"
+                },
+                "layout": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "blocks": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "t": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "t"
+                    ],
+                    "additionalProperties": true
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "number",
+                "layout",
+                "title",
+                "blocks"
+              ],
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "theme",
+          "slides"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.deck.created"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.archive_deck",
+      "title": "Archive a deck",
+      "description": "Put a deck away (archived: true) or bring it back (archived: false). Archived decks keep their share links.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "archived": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "deck"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "slides": {
+            "type": "number"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "slides",
+          "updated_at"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.deck.updated"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.delete_deck",
+      "title": "Delete a deck",
+      "description": "Delete a deck for everyone, with its comments and share links. Only when the person clearly asks.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          }
+        },
+        "required": [
+          "deck"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "delete",
+      "confirm": "human",
+      "emits": [
+        "decks.deck.deleted"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.add_slide",
+      "title": "Add a slide",
+      "description": "Add a slide with a layout and, optionally, its words, blocks, image and speaker notes. It goes at the end, or after the slide named in after. Returns the slide with its block ids.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "after": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "Put it after this slide (0 or leave out: at the end)"
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "title",
+              "section",
+              "content",
+              "two_column",
+              "image_left",
+              "image_right",
+              "full_image",
+              "big_number",
+              "quote",
+              "closing",
+              "blank"
+            ],
+            "description": "The layout: title, section, content, two_column, image_left, image_right, full_image, big_number, quote, closing, blank. decks.list_layouts explains each.",
+            "default": "content"
+          },
+          "kicker": {
+            "type": "string",
+            "description": "A small line above the title"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string",
+            "description": "A line under the title"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "t": {
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "heading",
+                    "bullets",
+                    "quote",
+                    "stats",
+                    "cards",
+                    "table",
+                    "chart",
+                    "image",
+                    "steps",
+                    "timeline",
+                    "checklist",
+                    "callout",
+                    "chat",
+                    "score",
+                    "kv",
+                    "button"
+                  ],
+                  "description": "The block type"
+                },
+                "slot": {
+                  "type": "string",
+                  "description": "Where on the slide: main, or left and right on two_column"
+                }
+              },
+              "required": [
+                "t"
+              ],
+              "additionalProperties": true,
+              "description": "A block. t is one of text, heading, bullets, quote, stats, cards, table, chart, image, steps, timeline, checklist, callout, chat, score, kv, button; its other fields depend on t (decks.list_layouts lists them). Example: { \"t\": \"stats\", \"items\": [{ \"value\": \"38%\", \"label\": \"Growth\" }] }"
+            },
+            "maxItems": 12,
+            "description": "The slide's blocks, in order. Keep slides light: one to three blocks."
+          },
+          "notes": {
+            "type": "string",
+            "description": "Speaker notes: what to say, only the presenter sees them"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "An https address or a file url from decks.upload_file"
+                  },
+                  "alt": {
+                    "type": "string"
+                  },
+                  "fit": {
+                    "type": "string",
+                    "enum": [
+                      "cover",
+                      "contain"
+                    ]
+                  },
+                  "position": {
+                    "type": "string",
+                    "description": "Which part to keep in view, like \"center top\""
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The picture for image_left, image_right and full_image layouts"
+          },
+          "bg": {
+            "type": "string",
+            "enum": [
+              "default",
+              "alt",
+              "accent",
+              "inverse"
+            ],
+            "description": "Background: default, alt (a card colour), accent, or inverse (the opposite mode)"
+          },
+          "hidden": {
+            "type": "boolean",
+            "description": "Hidden slides are skipped when presenting and exporting"
+          }
+        },
+        "required": [
+          "deck"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "number": {
+            "type": "number"
+          },
+          "layout": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "t": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "t"
+              ],
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "layout",
+          "title",
+          "blocks"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.slide.added"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.set_slide_content",
+      "title": "Change a slide",
+      "description": "Change a slide: its layout, kicker, title, subtitle, image, background, notes or whole list of blocks. Only what you give changes; blocks, when given, replace every block on the slide (use decks.update_block to change one).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "A slide: its id (s_...) or its number, 1 being the first"
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "title",
+              "section",
+              "content",
+              "two_column",
+              "image_left",
+              "image_right",
+              "full_image",
+              "big_number",
+              "quote",
+              "closing",
+              "blank"
+            ],
+            "description": "The layout: title, section, content, two_column, image_left, image_right, full_image, big_number, quote, closing, blank. decks.list_layouts explains each."
+          },
+          "kicker": {
+            "type": "string",
+            "description": "A small line above the title"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string",
+            "description": "A line under the title"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "t": {
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "heading",
+                    "bullets",
+                    "quote",
+                    "stats",
+                    "cards",
+                    "table",
+                    "chart",
+                    "image",
+                    "steps",
+                    "timeline",
+                    "checklist",
+                    "callout",
+                    "chat",
+                    "score",
+                    "kv",
+                    "button"
+                  ],
+                  "description": "The block type"
+                },
+                "slot": {
+                  "type": "string",
+                  "description": "Where on the slide: main, or left and right on two_column"
+                }
+              },
+              "required": [
+                "t"
+              ],
+              "additionalProperties": true,
+              "description": "A block. t is one of text, heading, bullets, quote, stats, cards, table, chart, image, steps, timeline, checklist, callout, chat, score, kv, button; its other fields depend on t (decks.list_layouts lists them). Example: { \"t\": \"stats\", \"items\": [{ \"value\": \"38%\", \"label\": \"Growth\" }] }"
+            },
+            "maxItems": 12,
+            "description": "The slide's blocks, in order. Keep slides light: one to three blocks."
+          },
+          "notes": {
+            "type": "string",
+            "description": "Speaker notes: what to say, only the presenter sees them"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "An https address or a file url from decks.upload_file"
+                  },
+                  "alt": {
+                    "type": "string"
+                  },
+                  "fit": {
+                    "type": "string",
+                    "enum": [
+                      "cover",
+                      "contain"
+                    ]
+                  },
+                  "position": {
+                    "type": "string",
+                    "description": "Which part to keep in view, like \"center top\""
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The picture for image_left, image_right and full_image layouts"
+          },
+          "bg": {
+            "type": "string",
+            "enum": [
+              "default",
+              "alt",
+              "accent",
+              "inverse"
+            ],
+            "description": "Background: default, alt (a card colour), accent, or inverse (the opposite mode)"
+          },
+          "hidden": {
+            "type": "boolean",
+            "description": "Hidden slides are skipped when presenting and exporting"
+          }
+        },
+        "required": [
+          "deck",
+          "slide"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "number": {
+            "type": "number"
+          },
+          "layout": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "t": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "t"
+              ],
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "layout",
+          "title",
+          "blocks"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.slide.updated"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.set_notes",
+      "title": "Speaker notes",
+      "description": "Write a slide's speaker notes: what to say. Only the presenter sees them (in presenter view and in the PowerPoint file).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "A slide: its id (s_...) or its number, 1 being the first"
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 20000
+          }
+        },
+        "required": [
+          "deck",
+          "slide",
+          "notes"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.slide.updated"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.duplicate_slide",
+      "title": "Duplicate a slide",
+      "description": "Copy a slide, words, blocks and notes, and put the copy right after it.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "A slide: its id (s_...) or its number, 1 being the first"
+          }
+        },
+        "required": [
+          "deck",
+          "slide"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "number": {
+            "type": "number"
+          },
+          "layout": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "t": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "t"
+              ],
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "layout",
+          "title",
+          "blocks"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.slide.added"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.reorder_slides",
+      "title": "Move slides",
+      "description": "Move one slide to a new position (slide and to), or put every slide in a new order (order: all slide ids or numbers, first to last).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "A slide: its id (s_...) or its number, 1 being the first"
+          },
+          "to": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "The new position, 1 being the first"
+          },
+          "order": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              ],
+              "description": "A slide: its id (s_...) or its number, 1 being the first"
+            }
+          }
+        },
+        "required": [
+          "deck"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "order"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.slide.moved"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.delete_slide",
+      "title": "Delete a slide",
+      "description": "Remove a slide from the deck.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "A slide: its id (s_...) or its number, 1 being the first"
+          }
+        },
+        "required": [
+          "deck",
+          "slide"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "delete",
+      "confirm": "none",
+      "emits": [
+        "decks.slide.deleted"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.add_block",
+      "title": "Add a block",
+      "description": "Add one block to a slide: text, heading, bullets, quote, stats, cards, table, chart, image, steps, timeline, checklist, callout, chat (an agent answer), score, kv or button. decks.list_layouts lists each one's fields.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "A slide: its id (s_...) or its number, 1 being the first"
+          },
+          "block": {
+            "type": "object",
+            "properties": {
+              "t": {
+                "type": "string",
+                "enum": [
+                  "text",
+                  "heading",
+                  "bullets",
+                  "quote",
+                  "stats",
+                  "cards",
+                  "table",
+                  "chart",
+                  "image",
+                  "steps",
+                  "timeline",
+                  "checklist",
+                  "callout",
+                  "chat",
+                  "score",
+                  "kv",
+                  "button"
+                ],
+                "description": "The block type"
+              },
+              "slot": {
+                "type": "string",
+                "description": "Where on the slide: main, or left and right on two_column"
+              }
+            },
+            "required": [
+              "t"
+            ],
+            "additionalProperties": true,
+            "description": "A block. t is one of text, heading, bullets, quote, stats, cards, table, chart, image, steps, timeline, checklist, callout, chat, score, kv, button; its other fields depend on t (decks.list_layouts lists them). Example: { \"t\": \"stats\", \"items\": [{ \"value\": \"38%\", \"label\": \"Growth\" }] }"
+          },
+          "slot": {
+            "type": "string"
+          },
+          "at": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Its position among the slide's blocks (default: last)"
+          }
+        },
+        "required": [
+          "deck",
+          "slide",
+          "block"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "t": {
+            "type": "string"
+          },
+          "slide": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "t",
+          "slide"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.slide.updated"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.update_block",
+      "title": "Change a block",
+      "description": "Change some fields of one block, like its text, its items or a chart's numbers. The block keeps its type.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "A slide: its id (s_...) or its number, 1 being the first"
+          },
+          "block": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "A block on the slide: its id (b_...) or its number on the slide, 1 being the first"
+          },
+          "set": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true,
+            "description": "The fields to change, like { \"text\": \"...\" } or { \"items\": [...] }"
+          }
+        },
+        "required": [
+          "deck",
+          "slide",
+          "block",
+          "set"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "t": {
+            "type": "string"
+          },
+          "slide": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "t",
+          "slide"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.slide.updated"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.move_block",
+      "title": "Move a block",
+      "description": "Move a block up or down on its slide (to a position), or into another slot (left or right on two-column slides).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "A slide: its id (s_...) or its number, 1 being the first"
+          },
+          "block": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "A block on the slide: its id (b_...) or its number on the slide, 1 being the first"
+          },
+          "to": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "slot": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "deck",
+          "slide",
+          "block"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.slide.updated"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.remove_block",
+      "title": "Remove a block",
+      "description": "Take one block off a slide.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "A slide: its id (s_...) or its number, 1 being the first"
+          },
+          "block": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "A block on the slide: its id (b_...) or its number on the slide, 1 being the first"
+          }
+        },
+        "required": [
+          "deck",
+          "slide",
+          "block"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.slide.updated"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.add_image",
+      "title": "Add an image",
+      "description": "Put an image on a slide, by its https address or a file uploaded with decks.upload_file. as: block (default) adds an image block; slide sets the picture of an image_left, image_right or full_image slide (and switches a slide with another layout to image_right).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "A slide: its id (s_...) or its number, 1 being the first"
+          },
+          "url": {
+            "type": "string"
+          },
+          "file": {
+            "type": "string",
+            "description": "A file id from decks.upload_file"
+          },
+          "alt": {
+            "type": "string"
+          },
+          "fit": {
+            "type": "string",
+            "enum": [
+              "cover",
+              "contain"
+            ]
+          },
+          "caption": {
+            "type": "string"
+          },
+          "as": {
+            "type": "string",
+            "enum": [
+              "block",
+              "slide"
+            ]
+          },
+          "slot": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "deck",
+          "slide"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "slide": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "slide"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.slide.updated"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.add_chart",
+      "title": "Add a chart",
+      "description": "Draw a chart on a slide from numbers: column (default), bar, line, area or donut. labels are the categories or dates; series are one or more named lists of numbers, one per label. One axis only: put measures of different size on different slides.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "A slide: its id (s_...) or its number, 1 being the first"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "column",
+              "bar",
+              "line",
+              "area",
+              "donut"
+            ]
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "maxItems": 24
+          },
+          "series": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "values": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              },
+              "required": [
+                "name",
+                "values"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 6
+          },
+          "unit": {
+            "type": "string",
+            "description": "Like $, %, $k, h"
+          },
+          "title": {
+            "type": "string"
+          },
+          "slot": {
+            "type": "string"
+          },
+          "at": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "deck",
+          "slide",
+          "labels",
+          "series"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "t": {
+            "type": "string"
+          },
+          "slide": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "t",
+          "slide"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.slide.updated"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.upload_file",
+      "title": "Upload a file",
+      "description": "Upload an image (or a PowerPoint file to import) as base64. Returns its id and url, for decks.add_image, decks.set_brand logo, or decks.import_pptx. The screens stream files to /files/decks instead; this is the same thing for agents.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "description": "Like image/png"
+          },
+          "content_base64": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "content_base64"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "size": {
+            "type": "number"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "size",
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.apply_theme",
+      "title": "Change the theme",
+      "description": "Change how the whole deck looks: a preset, or any of colour scheme, mode, corners, faces, surface and density. Every ui-design kit scheme and style is available; decks.list_themes lists them.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "preset": {
+            "type": "string",
+            "enum": [
+              "clean",
+              "ops",
+              "midnight",
+              "editorial",
+              "calm",
+              "garden",
+              "playful",
+              "war_room"
+            ],
+            "description": "A ready look: clean, ops, midnight, editorial, calm, garden, playful, war_room. Other options given with it override it."
+          },
+          "scheme": {
+            "type": "string",
+            "enum": [
+              "ops",
+              "midnight",
+              "neutral",
+              "ember",
+              "tide",
+              "sage",
+              "arcade",
+              "warroom"
+            ],
+            "description": "Colour scheme: ops, midnight, neutral, ember, tide, sage, arcade, warroom"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "light",
+              "dark"
+            ]
+          },
+          "shape": {
+            "type": "string",
+            "enum": [
+              "sharp",
+              "soft",
+              "round"
+            ],
+            "description": "Corners: sharp, soft or round"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "grotesk",
+              "mono",
+              "editorial",
+              "humanist",
+              "pixel",
+              "system"
+            ],
+            "description": "Faces: grotesk, mono, editorial (serif), humanist, pixel or system"
+          },
+          "surface": {
+            "type": "string",
+            "enum": [
+              "flat",
+              "bordered",
+              "elevated",
+              "glass"
+            ],
+            "description": "How cards sit: flat, bordered, elevated or glass"
+          },
+          "density": {
+            "type": "string",
+            "enum": [
+              "compact",
+              "comfortable",
+              "spacious"
+            ]
+          }
+        },
+        "required": [
+          "deck"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "theme": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "theme"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.deck.updated"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.set_brand",
+      "title": "Brand",
+      "description": "Put a brand over the theme: logo (image url), accent colour (#rrggbb), on_accent, font and display faces (CSS families), fonts_href (a Google Fonts stylesheet) and footer text. Give an empty string to clear one.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "logo": {
+            "type": "string"
+          },
+          "accent": {
+            "type": "string"
+          },
+          "on_accent": {
+            "type": "string"
+          },
+          "font": {
+            "type": "string"
+          },
+          "display": {
+            "type": "string"
+          },
+          "fonts_href": {
+            "type": "string"
+          },
+          "footer": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "deck"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "brand": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "brand"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.deck.updated"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.apply_team_brand",
+      "title": "Use a team brand",
+      "description": "Put a warOnSaaS team's brand kit on the deck: its logo, accent colour, fonts and look (scheme, mode, faces, corners). team is the team's slug on account.waronsaas.com. Only on servers that use the warOnSaaS account.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "team": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The team slug, like acme-dental"
+          }
+        },
+        "required": [
+          "deck",
+          "team"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "theme": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true
+          },
+          "brand": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "theme",
+          "brand"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.deck.updated"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.sync_doc",
+      "title": "Save typing",
+      "description": "Merge a Yjs update from an editor into the deck: what someone typed or changed in place. Agents use decks.set_slide_content and decks.update_block instead.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "update": {
+            "type": "string",
+            "description": "A base64 Yjs update"
+          }
+        },
+        "required": [
+          "deck",
+          "update"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [],
+      "hidden": true,
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.set_preferences",
+      "title": "Your preferences",
+      "description": "Your own settings: the app's light or dark look (auto follows your device).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "theme": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "light",
+              "dark"
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "prefs": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "prefs"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.add_comment",
+      "title": "Comment",
+      "description": "Leave a comment on a slide (or on the deck), or reply to a comment with reply_to.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "slide": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "integer",
+                "minimum": 1
+              }
+            ],
+            "description": "A slide: its id (s_...) or its number, 1 being the first"
+          },
+          "block": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "reply_to": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "deck",
+          "body"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "slide": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "author": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "id",
+          "body",
+          "slide",
+          "author"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.comment.added"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.resolve_comment",
+      "title": "Resolve a comment",
+      "description": "Mark a comment as dealt with (resolved: true) or open it again (false).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "type": "string"
+          },
+          "resolved": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "comment"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "slide": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "author": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "id",
+          "body",
+          "slide",
+          "author"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.comment.resolved"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.delete_comment",
+      "title": "Delete a comment",
+      "description": "Delete your own comment (admins can delete anyone's).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "comment"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "delete",
+      "confirm": "none",
+      "emits": [
+        "decks.comment.deleted"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.share_deck",
+      "title": "Share a link",
+      "description": "Make a view-only link anyone can open without an account (kind: view), or an embed for a web page (kind: embed). Returns the link. Anyone with it can see the deck, so an app asks the person first.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "view",
+              "embed"
+            ]
+          }
+        },
+        "required": [
+          "deck"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "url"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "human",
+      "emits": [
+        "decks.deck.shared"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.unshare_deck",
+      "title": "Turn off a link",
+      "description": "Turn off a share or embed link (or every link of the deck when none is named). People who open it see that it is gone.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "share": {
+            "type": "string",
+            "description": "The share id; leave out to turn off every link"
+          }
+        },
+        "required": [
+          "deck"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.deck.unshared"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.export_pdf",
+      "title": "Export as PDF",
+      "description": "Make a PDF of the deck, one page per slide (hidden slides left out). Returns a download link for the team. with_notes adds a page of speaker notes after each slide.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "with_notes": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "deck"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "size": {
+                "type": "number"
+              },
+              "url": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "type",
+              "size",
+              "url"
+            ],
+            "additionalProperties": false
+          },
+          "pages": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "file",
+          "pages"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.deck.exported"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.export_pptx",
+      "title": "Export as PowerPoint",
+      "description": "Make a PowerPoint file (.pptx) of the deck that opens in PowerPoint, Keynote and Google Slides: real text boxes, tables and charts you can edit, images, and speaker notes. Returns a download link for the team.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          }
+        },
+        "required": [
+          "deck"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "size": {
+                "type": "number"
+              },
+              "url": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "type",
+              "size",
+              "url"
+            ],
+            "additionalProperties": false
+          },
+          "slides": {
+            "type": "number"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "file",
+          "slides",
+          "notes"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.deck.exported"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.import_pptx",
+      "title": "Import PowerPoint",
+      "description": "Make a deck from a PowerPoint file uploaded with decks.upload_file. Best effort: titles, text, bullets, images, tables, simple charts and speaker notes come across, on the closest layout. The report says honestly what did not (animations, exact positions, shapes, SmartArt, video, custom fonts).",
+      "input": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "The uploaded .pptx file id"
+          },
+          "title": {
+            "type": "string"
+          },
+          "theme": {
+            "type": "object",
+            "properties": {
+              "preset": {
+                "type": "string",
+                "enum": [
+                  "clean",
+                  "ops",
+                  "midnight",
+                  "editorial",
+                  "calm",
+                  "garden",
+                  "playful",
+                  "war_room"
+                ],
+                "description": "A ready look: clean, ops, midnight, editorial, calm, garden, playful, war_room. Other options given with it override it."
+              },
+              "scheme": {
+                "type": "string",
+                "enum": [
+                  "ops",
+                  "midnight",
+                  "neutral",
+                  "ember",
+                  "tide",
+                  "sage",
+                  "arcade",
+                  "warroom"
+                ],
+                "description": "Colour scheme: ops, midnight, neutral, ember, tide, sage, arcade, warroom"
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "light",
+                  "dark"
+                ]
+              },
+              "shape": {
+                "type": "string",
+                "enum": [
+                  "sharp",
+                  "soft",
+                  "round"
+                ],
+                "description": "Corners: sharp, soft or round"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "grotesk",
+                  "mono",
+                  "editorial",
+                  "humanist",
+                  "pixel",
+                  "system"
+                ],
+                "description": "Faces: grotesk, mono, editorial (serif), humanist, pixel or system"
+              },
+              "surface": {
+                "type": "string",
+                "enum": [
+                  "flat",
+                  "bordered",
+                  "elevated",
+                  "glass"
+                ],
+                "description": "How cards sit: flat, bordered, elevated or glass"
+              },
+              "density": {
+                "type": "string",
+                "enum": [
+                  "compact",
+                  "comfortable",
+                  "spacious"
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "theme": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              },
+              "slides": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "number": {
+                      "type": "number"
+                    },
+                    "layout": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "blocks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "t": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "t"
+                        ],
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "number",
+                    "layout",
+                    "title",
+                    "blocks"
+                  ],
+                  "additionalProperties": true
+                }
+              }
+            },
+            "required": [
+              "id",
+              "title",
+              "theme",
+              "slides"
+            ],
+            "additionalProperties": true
+          },
+          "report": {
+            "type": "object",
+            "properties": {
+              "slides": {
+                "type": "number"
+              },
+              "carried": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "not_carried": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "slides",
+              "carried",
+              "not_carried"
+            ],
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "deck",
+          "report"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.deck.created"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.export_data",
+      "title": "Export everything",
+      "description": "Every deck of the team as JSON (slides, notes, theme, brand, comments, share links), plus a list of uploaded files. Returns a download link.",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "size": {
+                "type": "number"
+              },
+              "url": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "type",
+              "size",
+              "url"
+            ],
+            "additionalProperties": false
+          },
+          "counts": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "file",
+          "counts"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "admin",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.link_record",
+      "title": "Link to a CRM record",
+      "description": "Tie a deck to a CRM record, like the deal it is for. Inside the wOS suite the record is looked up in the CRM and a note with the deck's link is logged on it; on its own, give a label and url.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "record": {
+            "type": "string",
+            "description": "The CRM record id, like d_acme01 for a deal"
+          },
+          "label": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "deck",
+          "record"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "kind"
+              ],
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "links"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.deck.linked"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.request_review",
+      "title": "Ask for a review",
+      "description": "Ask someone to review the deck. Inside the wOS suite this makes a task on the board (for a client, given to a person, with a due date) that links to the deck; on its own it is recorded on the deck and posted as a comment.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "client": {
+            "type": "string",
+            "description": "The board client the task goes under (the suite's board needs one)"
+          },
+          "assignee": {
+            "type": "string",
+            "description": "Who reviews it (name)"
+          },
+          "due": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "deck"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            }
+          },
+          "task": {}
+        },
+        "required": [
+          "links"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.review.requested"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.unlink_record",
+      "title": "Remove a link",
+      "description": "Remove a CRM or review link from a deck.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "deck": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A deck: its id (d_...) or its exact title"
+          },
+          "link": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "deck",
+          "link"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "links"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [
+        "decks.deck.linked"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.add_person",
+      "title": "Add someone",
+      "description": "Add a person to the team by email (and GitHub login if they use it). They can then sign in and edit every team deck.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "name": {
+            "type": "string"
+          },
+          "github": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "member",
+              "admin"
+            ]
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "admin",
+      "confirm": "none",
+      "emits": [
+        "decks.person.added"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.remove_person",
+      "title": "Remove someone",
+      "description": "Take a person off the team. They are signed out everywhere; their decks and comments stay.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "person": {
+            "type": "string",
+            "description": "Their id or email"
+          }
+        },
+        "required": [
+          "person"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "admin",
+      "confirm": "human",
+      "emits": [
+        "decks.person.removed"
+      ],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.list_approvals",
+      "title": "Waiting for your yes",
+      "description": "Things an AI app asked to do that need your yes first (sharing a deck publicly, deleting a deck, removing someone).",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "approvals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "tool": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "tool",
+                "status"
+              ],
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "approvals"
+        ],
+        "additionalProperties": false
+      },
+      "scope": "read",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    },
+    {
+      "name": "decks.decide_approval",
+      "title": "Approve or decline",
+      "description": "Say yes or no to something an AI app asked to do. Yes runs it as you. Only from the app, by a person.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "approval": {
+            "type": "string"
+          },
+          "approve": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "approval",
+          "approve"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status"
+        ],
+        "additionalProperties": true
+      },
+      "scope": "write",
+      "confirm": "none",
+      "emits": [],
+      "test": "test/tools.test.mjs"
+    }
+  ]
+}
