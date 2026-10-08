@@ -32,7 +32,7 @@ test('every tool has a name, title, plain description, schemas, scope, confirm a
     assert.match(t.name, /^decks\.[a-z]+(_[a-z]+)*$/, t.name);
     assert.ok(mod.toWire(t.name).length <= 64 && /^[A-Za-z0-9_-]+$/.test(mod.toWire(t.name)), `${t.name} wire name`);
     assert.ok(t.title && t.description.length > 20, `${t.name} describes itself`);
-    assert.ok(!/—|–/.test(t.description + t.title), `${t.name}: no dashes`);
+    assert.ok(!/\u2014|\u2013/.test(t.description + t.title), `${t.name}: no dashes`);
     assert.equal(t.input.type, 'object');
     assert.ok(t.output);
     assert.ok(['read', 'write', 'delete', 'admin'].includes(t.scope));
