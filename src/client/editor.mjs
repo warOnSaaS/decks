@@ -335,7 +335,7 @@ export async function openEditor(host, S, deckId, path) {
   async function removeBlock() { if (!E.blockId) return; const b = E.blockId; E.blockId = null; await tool('decks.remove_block', { slide: E.slideId, block: b }); renderAll(); }
   async function present(presenter = false) {
     await sync.flush().catch(() => {});
-    if (presenter) { window.open(`${location.pathname}#/d/${deckId}/presenter?at=${idx()}`, `decks-presenter-${deckId}`, 'width=1200,height=760'); S.go(`/d/${deckId}/present?at=${idx()}`); }
+    if (presenter) { window.open(S.href(`/d/${deckId}/presenter?at=${idx()}`), `decks-presenter-${deckId}`, 'width=1200,height=760'); S.go(`/d/${deckId}/present?at=${idx()}`); }
     else S.go(`/d/${deckId}/present?at=${idx()}`);
   }
 

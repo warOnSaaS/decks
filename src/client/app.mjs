@@ -15,6 +15,15 @@ export function mount(el, ctx) {
   el.classList.add('decks-root');
   const S = { ctx, el, view: null, route: null, settings: null, decks: [], archived: false, query: '' };
   S.go = (p) => ctx.navigate(p);
+  // An address for a path inside the app, for new windows: the standalone page or the suite's.
+  S.href = (p) => (ctx.standalone ? `/app#${p}` : `/a/decks${p}`);
+  // Links inside the app are written as #/path; in the suite they move through ctx.navigate.
+  el.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#/"]');
+    if (!a || ctx.standalone || e.metaKey || e.ctrlKey || a.target === '_blank') return;
+    e.preventDefault();
+    ctx.navigate(a.getAttribute('href').slice(1));
+  });
   S.call = async (name, input) => {
     const r = await ctx.callTool(name, input);
     if (r && r.pending && !('result' in r)) toast(esc(r.pending.message));
@@ -33,7 +42,7 @@ export function mount(el, ctx) {
     if (S.settings?.prefs?.theme && ctx.standalone) document.documentElement.dataset.mode = S.settings.prefs.theme;
     host.className = 'decks-app';
     if (m && m[2] === 'present') { host.innerHTML = ''; S.view = await openPresent(host, S, m[1], Number(new URLSearchParams(path.split('?')[1] ?? '').get('at') ?? 0)); return; }
-    if (m && m[2] === 'presenter') { host.innerHTML = ''; S.view = await openPresenter(host, S, m[1]); return; }
+    if (m && m[2] === 'presenter') { host.innerHTML = ''; S.view = await openPresenter(host, S, m[1], Number(new URLSearchParams(path.split('?')[1] ?? '').get('at') ?? 0)); return; }
     if (m) { host.innerHTML = ''; S.view = await openEditor(host, S, m[1], path); return; }
     shell(path.startsWith('/settings') ? 'settings' : path.startsWith('/connect') ? 'connect' : 'decks');
     if (path.startsWith('/settings')) return renderSettings();

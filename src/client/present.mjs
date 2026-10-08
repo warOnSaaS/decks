@@ -46,7 +46,7 @@ export async function openPresent(host, S, deckId, start = 0) {
     else if (e.key === 's' || e.key === 'P') openWin();
     else if (/^\d$/.test(e.key)) { const n = Number(e.key); go(n === 0 ? 9 : n - 1); }
   };
-  const openWin = () => window.open(`${location.pathname}#/d/${deckId}/presenter?at=${i}`, `decks-presenter-${deckId}`, 'width=1200,height=760');
+  const openWin = () => window.open(S.href(`/d/${deckId}/presenter?at=${i}`), `decks-presenter-${deckId}`, 'width=1200,height=760');
   document.addEventListener('keydown', key);
   pr.addEventListener('click', (e) => {
     const a = e.target.closest('[data-a]');
@@ -64,8 +64,8 @@ export async function openPresent(host, S, deckId, start = 0) {
   return { unmount() { close(); chan?.close(); document.removeEventListener('keydown', key); window.removeEventListener('resize', draw); } };
 }
 
-export async function openPresenter(host, S, deckId) {
-  let i = Number(new URLSearchParams(location.hash.split('?')[1] ?? '').get('at') ?? 0);
+export async function openPresenter(host, S, deckId, start = 0) {
+  let i = start;
   let ready = false;
   const { sync, close } = await loadDeck(S, deckId, () => { if (ready) draw(); });
   const shown = () => sync.deck.slides.filter((s) => !s.hidden);
