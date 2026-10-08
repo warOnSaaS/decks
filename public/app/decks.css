@@ -4,7 +4,7 @@
 /* ================= slides: 960 by 540, scaled to fit their box ================= */
 .dk-box{position:relative;aspect-ratio:16/9;width:100%;overflow:hidden;container-type:inline-size;border-radius:var(--ui-radius-sm);background:#0001}
 .dk-scale{position:absolute;left:0;top:0;width:960px;height:540px;transform-origin:0 0;transform:scale(var(--k,calc(100cqw / 960px)))}
-.dk-slide{--dk-c1:var(--ui-accent);--dk-c2:var(--ui-pop-2);--dk-c3:var(--ui-pop-3);--dk-c4:color-mix(in oklab,var(--ui-accent) 45%,var(--ui-bg));--dk-c5:var(--ui-ink-3);--dk-c6:color-mix(in oklab,var(--ui-pop-2) 50%,var(--ui-bg));--dk-plot-bg:var(--ui-bg);
+.dk-slide{--dk-c1:var(--ui-accent);--dk-c2:var(--ui-pop-3);--dk-c3:var(--ui-warn);--dk-c4:color-mix(in oklab,var(--ui-accent) 40%,var(--ui-bg));--dk-c5:var(--ui-ink-3);--dk-c6:var(--ui-pop-2);--dk-plot-bg:var(--ui-bg);
   position:relative;width:960px;height:540px;overflow:hidden;box-sizing:border-box;background:var(--ui-bg);color:var(--ui-ink);font-family:var(--ui-font);font-size:17px;line-height:1.45;text-align:left;-webkit-font-smoothing:antialiased;color-scheme:inherit}
 .dk-slide *,.dk-slide *::before,.dk-slide *::after{box-sizing:border-box}
 .dk-slide p{margin:0}
