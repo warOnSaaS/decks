@@ -1,7 +1,7 @@
 // The deck editor: the slide list, the canvas and the properties panel. Keyboard-first (press ? for keys,
 // Cmd+K for every action). Typing on a slide changes the live Yjs copy and goes to the server through
 // decks.sync_doc; every other button calls its own tool, then catches up with decks.get_changes.
-import { $, $$, esc, ic, ago, fitAll, fitBox, toast, dialog, download, copyText, mobile, mod, peerColor, initials, tone } from './util.mjs';
+import { $, hp, $$, esc, ic, ago, fitAll, fitBox, toast, dialog, download, copyText, mobile, mod, peerColor, initials, tone } from './util.mjs';
 import { DeckSync } from './sync.mjs';
 import { renderSlide, slideBox, slideText } from '../../lib/shared/render.mjs';
 import { LAYOUTS, LAYOUT_NAMES, BLOCKS, BLOCK_TYPES, BACKGROUNDS } from '../../lib/shared/layouts.mjs';
@@ -30,13 +30,13 @@ export async function openEditor(host, S, deckId, path) {
   const E = { slideId: null, blockId: null, tab: 'slide', commentsAll: false, comments: [], peers: new Map(), shares: null, activity: null, raf: 0, gone: false, sheet: false };
   host.innerHTML = `<div class="ed" id="ed">
     <header class="ed-top">
-      <a ${nav()} class="ui-btn is-ghost is-icon is-sm" href="#/" title="All decks" aria-label="All decks">${ic('back', 18)}</a>
+      <a ${nav()} class="ui-btn is-ghost is-icon is-sm" href="${hp}/" title="All decks" aria-label="All decks">${ic('back', 18)}</a>
       <form class="ed-title" data-tool="decks.update_deck"><input class="ed-title-i" name="title" aria-label="Deck title" maxlength="200" autocomplete="off"></form>
       <div class="ed-peers" id="ed-peers" aria-label="Also here"></div>
       <div class="ed-top-acts">
         <button type="button" class="ui-btn is-ghost is-sm hide-sm" ${help('opens the list of keys')} data-open="keys" title="Keys (?)" aria-label="Keyboard keys">${ic('keyboard')}</button>
         <button type="button" class="ui-btn is-quiet is-sm" ${help('opens sharing and export')} data-tab="share" title="Share (s)">${ic('share')}<span class="hide-sm">Share</span></button>
-        <a ${nav('starts present mode')} class="ui-btn is-accent is-sm" id="ed-present" href="#/d/${esc(deckId)}/present" title="Present (p)">${ic('play')}<span class="hide-sm">Present</span></a>
+        <a ${nav('starts present mode')} class="ui-btn is-accent is-sm" id="ed-present" href="${hp}/d/${esc(deckId)}/present" title="Present (p)">${ic('play')}<span class="hide-sm">Present</span></a>
         <button type="button" class="ui-btn is-ghost is-icon is-sm ed-sheet-btn" ${help('opens the slide panel')} data-open="sheet" aria-label="Edit panel">${ic('menu', 18)}</button>
       </div>
     </header>
@@ -55,7 +55,7 @@ export async function openEditor(host, S, deckId, path) {
   const ed = $('#ed', host);
   const sync = new DeckSync(ctx, deckId, () => schedule());
   try { await sync.load(); } catch (e) {
-    host.innerHTML = `<main class="ui-page"><div class="ui-card dl-empty"><h2>This deck cannot be opened</h2><p>${esc(e.message)}</p><a ${nav()} class="ui-btn is-quiet" href="#/">All decks</a></div></main>`;
+    host.innerHTML = `<main class="ui-page"><div class="ui-card dl-empty"><h2>This deck cannot be opened</h2><p>${esc(e.message)}</p><a ${nav()} class="ui-btn is-quiet" href="${hp}/">All decks</a></div></main>`;
     return { unmount() {} };
   }
   const deck = () => sync.deck;
@@ -172,7 +172,7 @@ export async function openEditor(host, S, deckId, path) {
     return `
     <section class="ed-sect"><h3 class="ui-label">Layout</h3><div class="ed-layouts">${LAYOUT_NAMES.map((l) => `<button type="button" data-tool="decks.set_slide_content" data-layout="${l}" aria-pressed="${s.layout === l}" title="${esc(LAYOUTS[l].about)}">${licon(l)}<span>${esc(LAYOUTS[l].label)}</span></button>`).join('')}</div></section>
     <section class="ed-sect"><h3 class="ui-label">Background</h3><div class="ui-seg ed-seg">${BACKGROUNDS.map((g) => `<button type="button" data-tool="decks.set_slide_content" data-bg="${g}" aria-pressed="${(s.bg || 'default') === g}">${g === 'default' ? 'Page' : g === 'alt' ? 'Card' : g === 'accent' ? 'Accent' : 'Inverse'}</button>`).join('')}</div></section>
-    ${L.image ? `<section class="ed-sect"><h3 class="ui-label">Picture</h3><form class="ed-form" data-tool="decks.add_image" data-as="slide"><input class="ui-input" name="url" placeholder="https://… image address" value="${esc(s.image?.url ?? '')}" aria-label="Image address"><div class="ed-row"><select class="ui-select" name="fit" aria-label="Fit"><option value="cover"${s.image?.fit !== 'contain' ? ' selected' : ''}>Fill</option><option value="contain"${s.image?.fit === 'contain' ? ' selected' : ''}>Whole image</option></select><label class="ui-btn is-quiet is-sm" data-tool="decks.add_image">${ic('upload')}<span>Upload</span><input type="file" accept="image/*" hidden data-tool="decks.add_image" data-upload="slide"></label><button class="ui-btn is-quiet is-sm" type="submit">Set</button></div><input class="ui-input" name="alt" placeholder="What it shows" value="${esc(s.image?.alt ?? '')}" aria-label="What it shows"></form></section>` : ''}
+    ${L.image ? `<section class="ed-sect"><h3 class="ui-label">Picture</h3><form class="ed-form" data-tool="decks.add_image" data-as="slide"><input class="ui-input" name="url" placeholder="https://… image address" value="${esc(s.image?.url ?? '')}" aria-label="Image address"><div class="ed-row"><select class="ui-select" name="fit" aria-label="Fit"><option value="cover"${s.image?.fit !== 'contain' ? ' selected' : ''}>Fill</option><option value="contain"${s.image?.fit === 'contain' ? ' selected' : ''}>Whole image</option></select><label class="ui-btn is-quiet is-sm" data-tool="decks.add_image">${ic('upload')}<span>Upload</span><input type="file" accept="image/*" hidden data-tool="decks.add_image" data-upload="slide"></label><button class="ui-btn is-quiet is-sm" type="submit" data-tool="decks.add_image">Set</button></div><input class="ui-input" name="alt" placeholder="What it shows" value="${esc(s.image?.alt ?? '')}" aria-label="What it shows"></form></section>` : ''}
     ${L.slots.length ? `<section class="ed-sect"><h3 class="ui-label">Add a block${s.layout === 'two_column' ? ` to the <select class="ed-inline-sel" id="ed-slot" data-tool="decks.add_block" aria-label="Column"><option value="left">left</option><option value="right"${b?.slot === 'right' ? ' selected' : ''}>right</option></select> column` : ''}</h3><div class="ed-blocks">${BLOCK_TYPES.map((t) => `<button type="button" data-tool="decks.add_block" data-add="${t}" title="${esc(Object.entries(BLOCKS[t].fields).map(([k, v]) => `${k}: ${v}`).join('\n'))}">${esc(BLOCKS[t].label)}</button>`).join('')}</div></section>` : ''}
     ${b ? blockPanel(s, b) : (s.blocks.length ? '<p class="ed-muted ed-hint">Click a block on the slide to change it.</p>' : '')}
     <section class="ed-sect ed-slide-acts"><h3 class="ui-label">This slide</h3><div class="ed-row">
@@ -206,7 +206,7 @@ export async function openEditor(host, S, deckId, path) {
     }
     const pos = s.blocks.findIndex((x) => x.id === b.id);
     return `<section class="ed-sect ed-block-sect"><h3 class="ui-label">${esc(BLOCKS[b.t].label)} block</h3>
-      ${f ? `<form class="ed-form" data-tool="decks.update_block" data-block="${esc(b.id)}" data-t="${b.t}">${f}<button class="ui-btn is-quiet is-sm" type="submit">Apply</button></form>` : '<p class="ed-muted">Type on the slide to change its words.</p>'}
+      ${f ? `<form class="ed-form" data-tool="decks.update_block" data-block="${esc(b.id)}" data-t="${b.t}">${f}<button class="ui-btn is-quiet is-sm" type="submit" data-tool="decks.update_block">Apply</button></form>` : '<p class="ed-muted">Type on the slide to change its words.</p>'}
       <div class="ed-row">
         <button type="button" class="ui-btn is-quiet is-sm" data-tool="decks.move_block" data-bmove="-1" ${pos === 0 ? 'disabled' : ''} aria-label="Move block up">${ic('up')}</button>
         <button type="button" class="ui-btn is-quiet is-sm" data-tool="decks.move_block" data-bmove="1" ${pos === s.blocks.length - 1 ? 'disabled' : ''} aria-label="Move block down">${ic('down')}</button>
@@ -269,7 +269,7 @@ export async function openEditor(host, S, deckId, path) {
       <input class="ui-input" name="display" placeholder="Title font, like Poppins, sans-serif" value="${esc(br.display ?? '')}" aria-label="Title font">
       <input class="ui-input" name="font" placeholder="Body font" value="${esc(br.font ?? '')}" aria-label="Body font">
       <input class="ui-input" name="fonts_href" placeholder="Google Fonts stylesheet address" value="${esc(br.fonts_href ?? '')}" aria-label="Fonts stylesheet">
-      <button class="ui-btn is-quiet is-sm" type="submit">Save brand</button></form></section>`;
+      <button class="ui-btn is-quiet is-sm" type="submit" data-tool="decks.set_brand">Save brand</button></form></section>`;
   }
 
   function commentsPane() {
@@ -284,7 +284,7 @@ export async function openEditor(host, S, deckId, path) {
     </div>`;
     return `<section class="ed-sect"><div class="ui-seg ed-seg"><button type="button" ${help('shows this slide\'s comments')} data-call="slide" aria-pressed="${!E.commentsAll}">This slide</button><button type="button" ${help('shows every comment')} data-call="all" aria-pressed="${E.commentsAll}">Whole deck</button></div></section>
       <div class="ed-cms">${list.map((c) => one(c)).join('') || '<p class="ed-muted">No comments here yet.</p>'}</div>
-      <form class="ed-form ed-cm-new" data-tool="decks.add_comment"><textarea class="ui-textarea" name="body" rows="3" required placeholder="${E.commentsAll ? 'A comment on the deck' : `A comment on slide ${idx() + 1}`}" aria-label="New comment"></textarea><button class="ui-btn is-quiet is-sm" type="submit">Comment</button></form>`;
+      <form class="ed-form ed-cm-new" data-tool="decks.add_comment"><textarea class="ui-textarea" name="body" rows="3" required placeholder="${E.commentsAll ? 'A comment on the deck' : `A comment on slide ${idx() + 1}`}" aria-label="New comment"></textarea><button class="ui-btn is-quiet is-sm" type="submit" data-tool="decks.add_comment">Comment</button></form>`;
   }
 
   function sharePane() {
@@ -292,14 +292,14 @@ export async function openEditor(host, S, deckId, path) {
     const sh = E.shares ?? [];
     const view = sh.find((x) => x.kind === 'view'), emb = sh.find((x) => x.kind === 'embed');
     return `
-    <section class="ed-sect"><h3 class="ui-label">Present</h3><div class="ed-row"><a ${nav('starts present mode')} class="ui-btn is-accent is-sm" href="#/d/${esc(deckId)}/present?at=${idx()}">${ic('play')}<span>Present</span></a><button type="button" class="ui-btn is-quiet is-sm" ${help('opens presenter view in a new window')} data-presenter>${ic('screen')}<span>Presenter view</span></button></div><p class="ed-muted">Presenter view opens in its own window with your notes, a timer and the next slide; the slides follow it.</p></section>
+    <section class="ed-sect"><h3 class="ui-label">Present</h3><div class="ed-row"><a ${nav('starts present mode')} class="ui-btn is-accent is-sm" href="${hp}/d/${esc(deckId)}/present?at=${idx()}">${ic('play')}<span>Present</span></a><button type="button" class="ui-btn is-quiet is-sm" ${help('opens presenter view in a new window')} data-presenter>${ic('screen')}<span>Presenter view</span></button></div><p class="ed-muted">Presenter view opens in its own window with your notes, a timer and the next slide; the slides follow it.</p></section>
     <section class="ed-sect"><h3 class="ui-label">View link</h3>${view ? `<div class="ui-copy ed-copy"><code>${esc(view.url)}</code><button type="button" class="ui-btn is-quiet is-sm" ${help('copies the link')} data-copy="${esc(view.url)}">Copy</button></div><div class="ed-row"><small class="ed-muted">${view.views} views. Anyone with the link can look; no account needed.</small><button type="button" class="ui-btn is-ghost is-sm" data-tool="decks.unshare_deck" data-unshare="${esc(view.id)}">Turn off</button></div>` : `<p class="ed-muted">A link anyone can open to look, without an account. They cannot edit.</p><button type="button" class="ui-btn is-quiet is-sm" data-tool="decks.share_deck" data-share="view">${ic('link')}<span>Make a view link</span></button>`}</section>
     <section class="ed-sect"><h3 class="ui-label">Embed</h3>${emb ? `<div class="ui-copy ed-copy"><code>${esc(emb.embed_html)}</code><button type="button" class="ui-btn is-quiet is-sm" ${help('copies the embed code')} data-copy="${esc(emb.embed_html)}">Copy</button></div><div class="ed-row"><small class="ed-muted">Paste it into any web page.</small><button type="button" class="ui-btn is-ghost is-sm" data-tool="decks.unshare_deck" data-unshare="${esc(emb.id)}">Turn off</button></div>` : `<button type="button" class="ui-btn is-quiet is-sm" data-tool="decks.share_deck" data-share="embed">${ic('screen')}<span>Make an embed</span></button>`}</section>
     <section class="ed-sect"><h3 class="ui-label">Export</h3><div class="ed-row ed-wrap"><button type="button" class="ui-btn is-quiet is-sm" data-tool="decks.export_pdf" data-export="pdf">${ic('download')}<span>PDF</span></button><button type="button" class="ui-btn is-quiet is-sm" data-tool="decks.export_pdf" data-export="pdf-notes">${ic('download')}<span>PDF with notes</span></button><button type="button" class="ui-btn is-quiet is-sm" data-tool="decks.export_pptx" data-export="pptx">${ic('pptx')}<span>PowerPoint</span></button></div></section>
     <section class="ed-sect"><h3 class="ui-label">Linked work</h3>
       ${(d.links ?? []).length ? `<div class="ed-links">${d.links.map((l) => `<div class="ed-link"><span class="ui-chip is-soft">${l.kind === 'crm' ? 'CRM' : 'Review'}</span>${l.url ? `<a ${nav('opens the linked record')} href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}</a>` : `<span>${esc(l.label)}</span>`}<button type="button" class="ui-btn is-ghost is-icon is-sm" data-tool="decks.unlink_record" data-unlink="${esc(l.id)}" aria-label="Remove link">${ic('x')}</button></div>`).join('')}</div>` : ''}
-      <form class="ed-form" data-tool="decks.link_record"><span class="ed-sub">A deck for a deal: link a CRM record</span><div class="ed-row"><input class="ui-input" name="record" required placeholder="Record id, like d_acme01" aria-label="CRM record id"><input class="ui-input" name="label" placeholder="Label (optional)" aria-label="Label"></div><button class="ui-btn is-quiet is-sm" type="submit">${ic('link')}<span>Link</span></button></form>
-      <form class="ed-form" data-tool="decks.request_review"><span class="ed-sub">Ask for a review (a task on the board)</span><div class="ed-row"><input class="ui-input" name="assignee" placeholder="Who reviews" aria-label="Who reviews"><input class="ui-input" name="due" type="date" aria-label="Due"></div><input class="ui-input" name="note" placeholder="What to look at" aria-label="Note"><button class="ui-btn is-quiet is-sm" type="submit">Ask</button></form>
+      <form class="ed-form" data-tool="decks.link_record"><span class="ed-sub">A deck for a deal: link a CRM record</span><div class="ed-row"><input class="ui-input" name="record" required placeholder="Record id, like d_acme01" aria-label="CRM record id"><input class="ui-input" name="label" placeholder="Label (optional)" aria-label="Label"></div><button class="ui-btn is-quiet is-sm" type="submit" data-tool="decks.link_record">${ic('link')}<span>Link</span></button></form>
+      <form class="ed-form" data-tool="decks.request_review"><span class="ed-sub">Ask for a review (a task on the board)</span><div class="ed-row"><input class="ui-input" name="assignee" placeholder="Who reviews" aria-label="Who reviews"><input class="ui-input" name="due" type="date" aria-label="Due"></div><input class="ui-input" name="note" placeholder="What to look at" aria-label="Note"><button class="ui-btn is-quiet is-sm" type="submit" data-tool="decks.request_review">Ask</button></form>
     </section>
     <section class="ed-sect"><h3 class="ui-label">Deck</h3><div class="ed-row ed-wrap"><button type="button" class="ui-btn is-quiet is-sm" data-tool="decks.duplicate_deck" data-dupdeck>${ic('copy')}<span>Duplicate deck</span></button><button type="button" class="ui-btn is-quiet is-sm" data-tool="decks.list_activity" data-activity>${ic('spark')}<span>What changed</span></button></div>
       ${E.activity ? `<ul class="ui-timeline ed-act">${E.activity.map((a) => `<li><b>${esc(a.by ?? 'Someone')}</b> ${esc(actWords(a))}${a.via && a.via !== 'web' ? ` <span class="ui-chip is-soft">${esc(a.via === 'mcp' || a.via === 'rest' ? 'AI app' : a.via)}</span>` : ''}<br><small>${ago(a.at)}</small></li>`).join('')}</ul>` : ''}</section>`;

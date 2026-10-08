@@ -1,4 +1,7 @@
 // Small pieces every screen uses.
+// Where in-app links point: #/path on the standalone page, /a/decks/path inside the suite.
+export let hp = '#';
+export const setLinkBase = (standalone) => { hp = standalone ? '#' : '/a/decks'; };
 export const $ = (s, el = document) => el.querySelector(s);
 export const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);

@@ -2,7 +2,7 @@
 // agents use over MCP. Every button, menu item and form names its tool in data-tool; elements that only
 // move around the screen say data-tool="none" with the reason in data-why.
 // It is the suite's screen part (CONTRACTS.md): mount(el, ctx) draws into el and returns { unmount, update }.
-import { $, $$, esc, ic, ago, fitAll, toast, dialog, download, copyText, mobile } from './util.mjs';
+import { $, hp, setLinkBase, $$, esc, ic, ago, fitAll, toast, dialog, download, copyText, mobile } from './util.mjs';
 import { slideBox } from '../../lib/shared/render.mjs';
 import { PRESETS, SCHEMES } from '../../lib/shared/themes.mjs';
 import { connectTiles } from '../../lib/shared/connect.mjs';
@@ -18,11 +18,12 @@ export function mount(el, ctx) {
   // An address for a path inside the app, for new windows: the standalone page or the suite's.
   S.href = (p) => (ctx.standalone ? `/app#${p}` : `/a/decks${p}`);
   // Links inside the app are written as #/path; in the suite they move through ctx.navigate.
+  setLinkBase(!!ctx.standalone);
   el.addEventListener('click', (e) => {
-    const a = e.target.closest('a[href^="#/"]');
+    const a = e.target.closest('a[href^="/a/decks/"], a[href="/a/decks"]');
     if (!a || ctx.standalone || e.metaKey || e.ctrlKey || a.target === '_blank') return;
     e.preventDefault();
-    ctx.navigate(a.getAttribute('href').slice(1));
+    ctx.navigate(a.getAttribute('href').slice('/a/decks'.length) || '/');
   });
   S.call = async (name, input) => {
     const r = await ctx.callTool(name, input);
@@ -55,12 +56,12 @@ export function mount(el, ctx) {
     const link = (href, key, icon, label) => `<a ${nav()} href="#${href}" data-nav="${key}"${current === key ? ' aria-current="page"' : ''}>${ic(icon, 18)}<span>${label}</span></a>`;
     host.innerHTML = `
     <aside class="ui-side" aria-label="Decks">
-      <a ${nav()} class="ui-brand dk-brand" href="#/"><span class="dk-mark">${ic('screen', 15)}</span><span>${esc(ctx.team ?? S.settings?.team?.name ?? 'Decks')}</span></a>
+      <a ${nav()} class="ui-brand dk-brand" href="${hp}/"><span class="dk-mark">${ic('screen', 15)}</span><span>${esc(ctx.team ?? S.settings?.team?.name ?? 'Decks')}</span></a>
       <nav class="ui-side-nav">${link('/', 'decks', 'grid', 'Decks')}${link('/connect', 'connect', 'spark', 'Connect your AI')}${link('/settings', 'settings', 'gear', 'Settings')}</nav>
       ${ctx.standalone ? `<div class="ui-side-low"><a class="ui-side-me" ${nav('opens the public front page')} href="/" target="_blank" rel="noopener"><span class="ui-avatar is-sm" data-tone="2">${esc((S.settings?.me?.name ?? '?')[0])}</span><span>${esc(S.settings?.me?.name ?? '')}<small>Host it yourself, free</small></span></a></div>` : ''}
     </aside>
     <div class="ui-main">
-      <header class="ui-topbar"><a ${nav()} class="ui-brand dk-brand" href="#/"><span class="dk-mark">${ic('screen', 14)}</span><span>Decks</span></a><a ${nav()} class="ui-btn is-ghost is-sm" href="#/connect">${ic('spark')}<span>Connect AI</span></a></header>
+      <header class="ui-topbar"><a ${nav()} class="ui-brand dk-brand" href="${hp}/"><span class="dk-mark">${ic('screen', 14)}</span><span>Decks</span></a><a ${nav()} class="ui-btn is-ghost is-sm" href="${hp}/connect">${ic('spark')}<span>Connect AI</span></a></header>
       <div id="view"></div>
       <nav class="ui-dock" aria-label="Main">${link('/', 'decks', 'grid', 'Decks')}${link('/connect', 'connect', 'spark', 'Connect AI')}${link('/settings', 'settings', 'gear', 'Settings')}</nav>
     </div>`;
@@ -72,11 +73,11 @@ export function mount(el, ctx) {
   async function renderDecks() {
     const v = $('#view', host);
     v.innerHTML = `<main class="ui-page dl">
-      <div class="ui-ph"><div><h1>Decks</h1><p>Make one here, or ask your own AI to build it. <a ${nav()} href="#/connect">Connect your AI</a></p></div>
+      <div class="ui-ph"><div><h1>Decks</h1><p>Make one here, or ask your own AI to build it. <a ${nav()} href="${hp}/connect">Connect your AI</a></p></div>
         <div class="dl-acts"><label class="ui-btn is-quiet" data-tool="decks.import_pptx">${ic('upload')}<span>Import PowerPoint</span><input type="file" accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation" hidden data-tool="decks.import_pptx" id="imp"></label>
         <button type="button" class="ui-btn is-accent" data-tool="decks.create_deck" data-open="new" title="New deck (n)">${ic('plus')}<span>New deck</span></button></div></div>
       <form class="ui-toolbar dl-bar" data-tool="decks.list_decks" role="search"><label class="dl-search">${ic('search')}<input class="ui-input" name="q" type="search" placeholder="Find a deck or words on a slide" value="${esc(S.query)}" aria-label="Find a deck"></label>
-        <label class="ui-check"><input type="checkbox" name="archived"${S.archived ? ' checked' : ''}><span>Show archived</span></label><button class="ui-btn is-quiet is-sm" type="submit">Find</button></form>
+        <label class="ui-check"><input type="checkbox" name="archived"${S.archived ? ' checked' : ''}><span>Show archived</span></label><button class="ui-btn is-quiet is-sm" type="submit" data-tool="decks.list_decks">Find</button></form>
       <div class="dl-grid" id="dl-grid"><div class="dl-loading">Loading</div></div>
     </main>`;
     $('#imp', v).addEventListener('change', (e) => importPptx(e.target.files[0]));
@@ -92,15 +93,15 @@ export function mount(el, ctx) {
     const { decks } = await S.call('decks.list_decks', { query: S.query || undefined, include_archived: S.archived, covers: true });
     S.decks = decks;
     if (!decks.length) {
-      grid.innerHTML = `<div class="ui-card dl-empty"><h2>${S.query ? 'Nothing matches' : 'No decks yet'}</h2><p>${S.query ? 'Try other words.' : 'Make your first deck, or connect your AI and ask it for one.'}</p><div class="dl-acts"><button type="button" class="ui-btn is-accent" data-tool="decks.create_deck" data-open="new2">${ic('plus')}<span>New deck</span></button><a ${nav()} class="ui-btn is-quiet" href="#/connect">${ic('spark')}<span>Connect your AI</span></a></div></div>`;
+      grid.innerHTML = `<div class="ui-card dl-empty"><h2>${S.query ? 'Nothing matches' : 'No decks yet'}</h2><p>${S.query ? 'Try other words.' : 'Make your first deck, or connect your AI and ask it for one.'}</p><div class="dl-acts"><button type="button" class="ui-btn is-accent" data-tool="decks.create_deck" data-open="new2">${ic('plus')}<span>New deck</span></button><a ${nav()} class="ui-btn is-quiet" href="${hp}/connect">${ic('spark')}<span>Connect your AI</span></a></div></div>`;
       $('[data-open=new2]', grid)?.addEventListener('click', newDeck);
       return;
     }
     // Covers come from list_decks: the first slide and the theme of each deck.
     const full = decks.map((d) => ({ ...d, first: d.cover?.slide ?? null }));
     grid.innerHTML = full.map((d) => `<article class="dl-card${d.archived ? ' is-archived' : ''}" data-deck="${esc(d.id)}">
-      <a ${nav('opens the deck')} href="#/d/${esc(d.id)}" class="dl-cover">${d.first ? slideBox(d.first, { theme: d.cover?.theme ?? {}, brand: d.cover?.brand ?? {} }, { cls: 'is-thumb' }) : '<div class="dk-box dl-blank"></div>'}</a>
-      <div class="dl-meta"><a ${nav('opens the deck')} href="#/d/${esc(d.id)}" class="dl-title">${esc(d.title)}</a><small>${d.slides} slide${d.slides === 1 ? '' : 's'} · ${ago(d.updated_at)}${d.archived ? ' · archived' : ''}</small></div>
+      <a ${nav('opens the deck')} href="${hp}/d/${esc(d.id)}" class="dl-cover">${d.first ? slideBox(d.first, { theme: d.cover?.theme ?? {}, brand: d.cover?.brand ?? {} }, { cls: 'is-thumb' }) : '<div class="dk-box dl-blank"></div>'}</a>
+      <div class="dl-meta"><a ${nav('opens the deck')} href="${hp}/d/${esc(d.id)}" class="dl-title">${esc(d.title)}</a><small>${d.slides} slide${d.slides === 1 ? '' : 's'} · ${ago(d.updated_at)}${d.archived ? ' · archived' : ''}</small></div>
       <div class="dl-menu"><button type="button" class="ui-btn is-ghost is-icon is-sm" data-tool="decks.duplicate_deck" data-act="dup" title="Duplicate" aria-label="Duplicate ${esc(d.title)}">${ic('copy')}</button><button type="button" class="ui-btn is-ghost is-icon is-sm" data-tool="decks.archive_deck" data-act="arch" title="${d.archived ? 'Bring back' : 'Archive'}" aria-label="${d.archived ? 'Bring back' : 'Archive'} ${esc(d.title)}">${ic('archive')}</button><button type="button" class="ui-btn is-ghost is-icon is-sm" data-tool="decks.delete_deck" data-act="del" title="Delete" aria-label="Delete ${esc(d.title)}">${ic('trash')}</button></div>
     </article>`).join('');
     fitAll(grid);
@@ -129,7 +130,7 @@ export function mount(el, ctx) {
       <label class="ui-field"><span>Title</span><input class="ui-input" name="title" required placeholder="Acme Dental: investor update" autofocus></label>
       <fieldset class="dlg-looks"><legend class="ui-label">Look</legend>${presets.map(([id, p], i) => `<label class="look"><input type="radio" name="preset" value="${id}"${i ? '' : ' checked'}><span class="look-sw" style="background:${SCHEMES[p.scheme][p.mode].bg};color:${SCHEMES[p.scheme][p.mode].ink}"><i style="background:${SCHEMES[p.scheme][p.mode].accent}"></i>Aa</span><small>${esc(id.replace('_', ' '))}</small></label>`).join('')}</fieldset>
       <label class="ui-field"><span>Start from</span><select class="ui-select" name="from"><option value="">A title slide</option><option value="acme">The investor update example</option><option value="birch">The client pitch example</option><option value="launch">The product launch example</option></select></label>
-      <footer class="dlg-f"><button type="button" class="ui-btn is-quiet" data-close data-tool="none" data-why="closes the form">Cancel</button><button class="ui-btn is-accent" type="submit">Make it</button></footer></form>`);
+      <footer class="dlg-f"><button type="button" class="ui-btn is-quiet" data-close data-tool="none" data-why="closes the form">Cancel</button><button class="ui-btn is-accent" type="submit" data-tool="decks.create_deck">Make it</button></footer></form>`);
     $('form', d).addEventListener('submit', async (e) => {
       e.preventDefault();
       const f = new FormData(e.target);
@@ -155,7 +156,7 @@ export function mount(el, ctx) {
         <p>${r.report.slides} slides came in. This is a best effort: check each slide.</p>
         <h3 class="ui-label">Came across</h3><ul class="ui-checks">${r.report.carried.map((x) => `<li>${esc(x)}</li>`).join('') || '<li class="is-open">Nothing</li>'}</ul>
         <h3 class="ui-label">Did not come across</h3><ul class="dlg-miss">${r.report.not_carried.map((x) => `<li>${esc(x)}</li>`).join('') || '<li>Nothing we know of</li>'}</ul>
-        <footer class="dlg-f"><a ${nav('opens the imported deck')} class="ui-btn is-accent" href="#/d/${esc(r.deck.id)}" data-close>Open it</a></footer></div>`, { wide: true });
+        <footer class="dlg-f"><a ${nav('opens the imported deck')} class="ui-btn is-accent" href="${hp}/d/${esc(r.deck.id)}" data-close>Open it</a></footer></div>`, { wide: true });
       await loadDecks();
     } catch (err) { toast(esc(err.message)); }
     const inp = $('#imp', host); if (inp) inp.value = '';
@@ -193,7 +194,7 @@ export function mount(el, ctx) {
       ${approvals.length ? `<section class="ui-card st-sect"><h2>Waiting for your yes</h2><p class="st-note">An AI app asked to do these. Nothing happens until you say yes.</p><div class="st-list">${approvals.map((a) => `<div class="st-row" data-ap="${esc(a.id)}"><div><b>${esc(a.title)}</b><small>${esc(a.requested_by)} asked ${ago(a.created_at)} · ${esc(JSON.stringify(a.input).slice(0, 120))}</small></div><div class="st-acts"><button type="button" class="ui-btn is-quiet is-sm" data-tool="decks.decide_approval" data-yes="0">Decline</button><button type="button" class="ui-btn is-accent is-sm" data-tool="decks.decide_approval" data-yes="1">Approve</button></div></div>`).join('')}</div></section>` : ''}
       <section class="ui-card st-sect"><h2>Look</h2><div class="ui-seg" role="group" aria-label="App look">${['auto', 'light', 'dark'].map((t) => `<button type="button" data-tool="decks.set_preferences" data-theme="${t}" aria-pressed="${(s.prefs.theme ?? 'auto') === t}">${t === 'auto' ? 'Follow device' : t[0].toUpperCase() + t.slice(1)}</button>`).join('')}</div></section>
       <section class="ui-card st-sect"><h2>People</h2><div class="st-list">${people.map((p) => `<div class="st-row"><div class="st-who"><span class="ui-avatar is-sm" data-tone="${(p.name.charCodeAt(0) % 5) + 1}">${esc(p.name[0])}</span><div><b>${esc(p.name)}${p.me ? ' (you)' : ''}</b><small>${esc(p.email ?? p.github ?? '')} · ${esc(p.role)}</small></div></div>${admin && !p.me && p.role !== 'owner' ? `<button type="button" class="ui-btn is-danger is-sm" data-tool="decks.remove_person" data-person="${esc(p.id)}">Remove</button>` : ''}</div>`).join('')}</div>
-        ${admin ? `<form class="st-add" data-tool="decks.add_person"><input class="ui-input" name="email" type="email" required placeholder="someone@company.example" aria-label="Email"><input class="ui-input" name="name" placeholder="Name (optional)" aria-label="Name"><button class="ui-btn is-quiet" type="submit">Add</button></form>` : ''}</section>
+        ${admin ? `<form class="st-add" data-tool="decks.add_person"><input class="ui-input" name="email" type="email" required placeholder="someone@company.example" aria-label="Email"><input class="ui-input" name="name" placeholder="Name (optional)" aria-label="Name"><button class="ui-btn is-quiet" type="submit" data-tool="decks.add_person">Add</button></form>` : ''}</section>
       <section class="ui-card st-sect"><h2>Your data</h2><p class="st-note">Everything is yours. Export every deck, slide, note, comment and link as one file at any time.</p>${admin ? '<button type="button" class="ui-btn is-quiet" data-tool="decks.export_data">' + ic('download') + '<span>Export everything</span></button>' : '<p class="st-note">Ask a team admin to export.</p>'}</section>
       <section class="ui-card st-sect"><h2>This server</h2><dl class="ui-kv"><dt>Database</dt><dd>${esc(s.server.storage)}</dd><dt>Files</dt><dd>${esc(s.server.files)}</dd><dt>Sign-in</dt><dd>${esc(s.server.sign_in)}</dd><dt>MCP address</dt><dd><code>${esc(s.server.mcp)}</code></dd><dt>Version</dt><dd>${esc(s.server.version)}</dd></dl>
         <p class="st-note">Host it yourself, free: <a ${nav('opens the source code')} href="https://github.com/warOnSaaS/decks" target="_blank" rel="noopener">github.com/warOnSaaS/decks</a>, one <code>docker compose up</code>.</p></section>

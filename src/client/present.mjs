@@ -1,7 +1,7 @@
 // Present mode (the audience screen) and presenter view (notes, a timer, the next slide).
 // The two windows follow each other through a BroadcastChannel, so moving in either moves both.
 // Moving between slides only changes what is on screen: no tools are called.
-import { $, esc, ic, fitAll } from './util.mjs';
+import { $, hp, esc, ic, fitAll } from './util.mjs';
 import { DeckSync } from './sync.mjs';
 import { slideBox } from '../../lib/shared/render.mjs';
 
@@ -74,7 +74,7 @@ export async function openPresenter(host, S, deckId, start = 0) {
   host.innerHTML = `<div class="pv" id="pv">
     <header class="pv-top"><b>${esc(sync.deck.title)}</b><span class="pv-clock" id="pv-clock"></span>
       <div class="pv-timer"><span id="pv-time">0:00</span><button type="button" class="ui-btn is-quiet is-sm" ${help('starts or pauses the timer')} data-a="timer">Start</button><button type="button" class="ui-btn is-ghost is-sm" ${help('resets the timer')} data-a="reset">Reset</button></div>
-      <a class="ui-btn is-ghost is-sm" ${help('goes back to the editor')} href="#/d/${esc(deckId)}">Done</a></header>
+      <a class="ui-btn is-ghost is-sm" ${help('goes back to the editor')} href="${hp}/d/${esc(deckId)}">Done</a></header>
     <div class="pv-body">
       <section class="pv-now"><div id="pv-now"></div><div class="pv-nav"><button type="button" class="ui-btn is-quiet" ${help('shows the previous slide')} data-a="prev">${ic('back')}<span>Back</span></button><span id="pv-n"></span><button type="button" class="ui-btn is-accent" ${help('shows the next slide')} data-a="next"><span>Next</span></button></div></section>
       <aside class="pv-side"><div class="pv-next"><span class="ui-label">Next</span><div id="pv-next"></div></div><div class="pv-notes"><span class="ui-label">Notes</span><div id="pv-notes"></div></div></aside>
