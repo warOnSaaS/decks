@@ -1,6 +1,6 @@
-.shots
-data
-test
-scripts
-src
+/.shots
+/data
+/test
+/scripts
+/src
 *.db
