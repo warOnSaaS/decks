@@ -16,7 +16,8 @@ async function loadDeck(S, deckId, onChange) {
 
 export async function openPresent(host, S, deckId, start = 0) {
   let i = start;
-  const { sync, close } = await loadDeck(S, deckId, () => draw());
+  let ready = false;
+  const { sync, close } = await loadDeck(S, deckId, () => { if (ready) draw(); });
   const shown = () => sync.deck.slides.filter((s) => !s.hidden);
   const chan = 'BroadcastChannel' in window ? new BroadcastChannel(`decks-present-${deckId}`) : null;
   host.innerHTML = `<div class="pr" id="pr" tabindex="-1" role="dialog" aria-label="Presenting">
@@ -25,6 +26,7 @@ export async function openPresent(host, S, deckId, start = 0) {
   </div>`;
   const pr = $('#pr', host);
   function draw() {
+    ready = true;
     const list = shown();
     i = Math.max(0, Math.min(list.length - 1, i));
     const s = list[i];
@@ -64,7 +66,8 @@ export async function openPresent(host, S, deckId, start = 0) {
 
 export async function openPresenter(host, S, deckId) {
   let i = Number(new URLSearchParams(location.hash.split('?')[1] ?? '').get('at') ?? 0);
-  const { sync, close } = await loadDeck(S, deckId, () => draw());
+  let ready = false;
+  const { sync, close } = await loadDeck(S, deckId, () => { if (ready) draw(); });
   const shown = () => sync.deck.slides.filter((s) => !s.hidden);
   const chan = 'BroadcastChannel' in window ? new BroadcastChannel(`decks-present-${deckId}`) : null;
   let started = null, paused = 0, running = false;
@@ -77,6 +80,7 @@ export async function openPresenter(host, S, deckId) {
       <aside class="pv-side"><div class="pv-next"><span class="ui-label">Next</span><div id="pv-next"></div></div><div class="pv-notes"><span class="ui-label">Notes</span><div id="pv-notes"></div></div></aside>
     </div></div>`;
   function draw() {
+    ready = true;
     const list = shown();
     i = Math.max(0, Math.min(list.length - 1, i));
     $('#pv-now', host).innerHTML = list[i] ? slideBox(list[i], sync.deck, { number: i + 1 }) : '';

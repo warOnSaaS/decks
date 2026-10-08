@@ -138,7 +138,7 @@ async function route(app, req, res) {
 
   const who = await identify(app, req);
   const html = (body, status = 200) => res.writeHead(status, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' }).end(body);
-  if (p === '/') return html(landingPage({ examples: (await app.exampleRows()).map(rowView), host, signedIn: !!who, version: VERSION, prompt: promptOn() }));
+  if (p === '/') return html(landingPage({ examples: await heroExamples(app), host, signedIn: !!who, version: VERSION, prompt: promptOn() }));
   if (p === '/connect') return html(connectPage({ host, signedIn: !!who, version: VERSION, prompt: promptOn() }));
   if (p.startsWith('/examples/')) {
     const slug = p.slice('/examples/'.length).replace(/\/$/, '');
@@ -165,6 +165,15 @@ async function route(app, req, res) {
   return html(gonePage({ version: VERSION }), 404);
 }
 
+// The examples for the front page, with a couple of their slides for the picture at the top.
+async function heroExamples(app) {
+  return Promise.all((await app.exampleRows()).map(async (r) => {
+    const v = rowView(r);
+    const d = await app.decks.json(r.id);
+    v.hero = [d.slides.find((s) => s.layout === 'quote') ?? d.slides[0], d.slides.find((s) => s.layout === 'two_column') ?? d.slides[1]];
+    return v;
+  }));
+}
 const promptOn = () => provider() === 'waronsaas' && !!account();
 const safe = (n) => (n && n.startsWith('/') && !n.startsWith('//') ? n : '/app');
 const redirect = (res, to) => res.writeHead(302, { location: to, 'cache-control': 'no-store' }).end();

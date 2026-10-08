@@ -26,11 +26,12 @@ export function mount(el, ctx) {
 
   async function update(path = ctx.path) {
     ctx.path = path;
-    const m = /^\/d\/([^/]+)(?:\/(present|presenter))?/.exec(path);
+    const m = /^\/d\/([^/?]+)(?:\/(presenter|present))?/.exec(path);
     S.view?.unmount?.();
     S.view = null;
     if (!S.settings) S.settings = await S.call('decks.get_settings', {}).catch(() => null);
     if (S.settings?.prefs?.theme && ctx.standalone) document.documentElement.dataset.mode = S.settings.prefs.theme;
+    host.className = 'decks-app';
     if (m && m[2] === 'present') { host.innerHTML = ''; S.view = await openPresent(host, S, m[1], Number(new URLSearchParams(path.split('?')[1] ?? '').get('at') ?? 0)); return; }
     if (m && m[2] === 'presenter') { host.innerHTML = ''; S.view = await openPresenter(host, S, m[1]); return; }
     if (m) { host.innerHTML = ''; S.view = await openEditor(host, S, m[1], path); return; }
@@ -41,6 +42,7 @@ export function mount(el, ctx) {
   }
 
   function shell(current) {
+    host.className = 'decks-app ui-shell';
     const link = (href, key, icon, label) => `<a ${nav()} href="#${href}" data-nav="${key}"${current === key ? ' aria-current="page"' : ''}>${ic(icon, 18)}<span>${label}</span></a>`;
     host.innerHTML = `
     <aside class="ui-side" aria-label="Decks">

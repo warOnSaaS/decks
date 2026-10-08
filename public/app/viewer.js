@@ -30,7 +30,7 @@
     var i = start || 0, idle;
     var el = document.createElement('div');
     el.className = 'pr'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Presenting');
-    el.innerHTML = '<div class="pr-stage"></div><div class="pr-bar"><button type="button" data-a="prev" aria-label="Previous slide">‹</button><span></span><button type="button" data-a="next" aria-label="Next slide">›</button><button type="button" data-a="exit">Exit</button></div>';
+    el.innerHTML = '<div class="pr-stage"></div><div class="pr-bar"><button type="button" data-a="prev" data-tool="none" data-why="shows the previous slide" aria-label="Previous slide">‹</button><span></span><button type="button" data-a="next" data-tool="none" data-why="shows the next slide" aria-label="Next slide">›</button><button type="button" data-a="exit" data-tool="none" data-why="leaves present mode">Exit</button></div>';
     document.body.appendChild(el);
     var stage = el.querySelector('.pr-stage'), count = el.querySelector('.pr-bar span');
     var show = function () { stage.innerHTML = ''; var c = list[i].cloneNode(true); stage.appendChild(c); fit(c); if (ro) ro.observe(c); count.textContent = (i + 1) + ' / ' + list.length; };

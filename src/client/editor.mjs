@@ -546,7 +546,7 @@ export async function openEditor(host, S, deckId, path) {
       ['Present', 'none', () => present()], ['Presenter view', 'none', () => present(true)],
       ['Duplicate deck', 'decks.duplicate_deck', async () => { const n = await tool('decks.duplicate_deck', {}); S.go(`/d/${n.id}`); }],
     ];
-    const d = dialog(S.el, `<div class="dlg pal"><input class="ui-input pal-q" placeholder="Type an action" aria-label="Find an action" autocomplete="off"><div class="pal-l" role="listbox"></div></div>`, { wide: true });
+    const d = dialog(S.el, `<div class="dlg pal"><input class="ui-input pal-q" ${help('finds an action in the list')} placeholder="Type an action" aria-label="Find an action" autocomplete="off"><div class="pal-l" role="listbox"></div></div>`, { wide: true });
     const q = $('.pal-q', d), l = $('.pal-l', d);
     let sel = 0, shown = acts;
     const draw = () => {
