@@ -1,0 +1,67 @@
+{
+  "$schema": "https://raw.githubusercontent.com/warOnSaaS/suite/main/packages/manifest/wos-app.schema.json",
+  "id": "decks",
+  "name": "Decks",
+  "description": "Pitch decks and presentations. Build them by hand or let your own AI build them over MCP; present, share a link, export to PDF and PowerPoint.",
+  "version": "0.1.0",
+  "license": "AGPL-3.0-only",
+  "requires": {
+    "core": ">=0.1"
+  },
+  "tools": "./tools.json",
+  "tables": "./migrations",
+  "server": "./server.mjs",
+  "screens": "./screens.mjs",
+  "icon": "slides",
+  "nav": {
+    "label": "Decks",
+    "order": 50
+  },
+  "events": {
+    "emits": [
+      "decks.comment.added",
+      "decks.comment.deleted",
+      "decks.comment.resolved",
+      "decks.deck.changed",
+      "decks.deck.created",
+      "decks.deck.deleted",
+      "decks.deck.exported",
+      "decks.deck.imported",
+      "decks.deck.linked",
+      "decks.deck.shared",
+      "decks.deck.unshared",
+      "decks.deck.updated",
+      "decks.person.added",
+      "decks.person.removed",
+      "decks.review.requested",
+      "decks.slide.added",
+      "decks.slide.deleted",
+      "decks.slide.moved",
+      "decks.slide.updated"
+    ],
+    "listens": []
+  },
+  "needs": {
+    "services": [],
+    "permissions": [],
+    "desktop": [],
+    "env": [
+      "FILES_STORAGE",
+      "FILES_DIR",
+      "FILES_MAX_MB",
+      "CHROMIUM_PATH",
+      "CRM_URL",
+      "WOS_ACCOUNT_URL"
+    ]
+  },
+  "data": {
+    "onDisable": "keep",
+    "exports": [
+      "decks",
+      "slides",
+      "comments",
+      "shares",
+      "files"
+    ]
+  }
+}
