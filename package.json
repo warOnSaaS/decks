@@ -20,7 +20,7 @@
   "scripts": {
     "start": "node server.mjs",
     "dev": "DECKS_EXAMPLES=1 node server.mjs",
-    "build": "node scripts/build.mjs",
+    "bundle": "node scripts/build.mjs",
     "test": "node --test --test-timeout=180000 --test-concurrency=1 test/*.test.mjs",
     "tools:json": "node scripts/tools-json.mjs",
     "sync-kit": "node scripts/sync-kit.mjs",

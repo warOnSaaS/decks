@@ -30,5 +30,7 @@ for (const f of files) {
   bytes += buf.length;
 }
 const rev = git('rev-parse', '--short', ref).toString().trim();
+// The scheme data is also read on the server (exports, themes), so it gets a copy beside the code.
+fs.copyFileSync(path.join(out, 'src/tokens.mjs'), path.resolve('lib', 'shared', 'kit-tokens.mjs'));
 fs.writeFileSync(path.join(out, 'SYNCED.txt'), `Copied from warOnSaaS/ui-design ${ref} at ${rev} by scripts/sync-kit.mjs. Do not edit.\n`);
 console.log(`synced ui-design ${ref} ${rev} (${files.length} files, ${bytes} bytes) into public/ui${note}`);
