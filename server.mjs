@@ -15,6 +15,7 @@ import { createMailer } from './lib/mail.mjs';
 import { DeckError, rowView } from './lib/decks.mjs';
 import { landingPage, viewerPage, embedPage, connectPage, gonePage, appPage } from './lib/pages.mjs';
 import { register } from './lib/suite.mjs';
+import { exampleAsset } from './lib/files.mjs';
 import {
   identify, setCookie, challenge, json, page, bodyObject, loginPage, githubRedirect, accountStart, accountFinish, account, provider,
   handleGithubCallback, handleEmailStart, handleEmailVerify, handleAuthorize, handleToken, handleRegister, resourceMetadata, serverMetadata, COOKIE,
@@ -257,6 +258,8 @@ async function handleUpload(app, req, res, url) {
 }
 
 async function handleDownload(app, req, res, p) {
+  const ex = exampleAsset(p);
+  if (ex) return res.writeHead(200, { 'content-type': 'image/png', 'content-length': ex.length, 'cache-control': 'public, max-age=86400' }).end(ex);
   const id = /^\/files\/decks\/(f_[\w-]+)/.exec(p)?.[1];
   const row = id ? await app.files.row(id) : null;
   if (!row) return json(res, 404, { error: { code: 'not_found', message: 'No such file.' } });
