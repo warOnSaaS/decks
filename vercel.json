@@ -1,0 +1,18 @@
+{
+  "outputDirectory": "public",
+  "functions": {
+    "api/index.mjs": {
+      "includeFiles": "{migrations/**,public/**,package.json,wos-app.json,tools.json,node_modules/@sparticuz/chromium/bin/**}",
+      "maxDuration": 300,
+      "memory": 2048
+    }
+  },
+  "rewrites": [
+    { "source": "/((?!ui/|app/|icon|manifest\\.webmanifest|robots\\.txt).*)", "destination": "/api/index?__p=/$1" }
+  ],
+  "headers": [
+    { "source": "/ui/fonts/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }] },
+    { "source": "/app/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }] }
+  ],
+  "regions": ["pdx1"]
+}

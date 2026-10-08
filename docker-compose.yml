@@ -1,0 +1,24 @@
+# Host wOS Decks yourself, free: docker compose up -d, then open http://localhost:3996
+# The first person to sign in becomes the owner. Settings live in .env (see README).
+services:
+  decks:
+    build: .
+    image: wos-decks
+    restart: unless-stopped
+    ports: ["3996:3996"]
+    env_file: [{ path: .env, required: false }]
+    environment:
+      DATABASE_URL: postgres://decks:decks@db:5432/decks
+      FILES_DIR: /data/files
+      OAUTH_SECRET: ${OAUTH_SECRET:-change-me-to-a-long-random-string}
+      AUTH_PROVIDER: ${AUTH_PROVIDER:-local}
+    volumes: ["decks-files:/data"]
+    depends_on:
+      db: { condition: service_healthy }
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment: { POSTGRES_USER: decks, POSTGRES_PASSWORD: decks, POSTGRES_DB: decks }
+    volumes: ["decks-db:/var/lib/postgresql/data"]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U decks"], interval: 5s, retries: 10 }
+volumes: { decks-db: {}, decks-files: {} }

@@ -1,0 +1,7 @@
+node_modules
+.git
+.shots
+data
+*.db
+.env
+.vercel
