@@ -52,13 +52,21 @@ export function mount(el, ctx) {
   }
 
   function shell(current) {
+    const link = (href, key, icon, label) => `<a ${nav()} href="${hp}${href}" data-nav="${key}"${current === key ? ' aria-current="page"' : ''}>${ic(icon, 18)}<span>${label}</span></a>`;
+    const teamName = typeof ctx.team === 'string' ? ctx.team : ctx.team?.name ?? S.settings?.team?.name ?? 'Decks';
+    if (!ctx.standalone) {
+      // Inside the suite: the suite has the rail; Decks keeps a row of tabs at the top of its page.
+      host.className = 'decks-app is-suite';
+      host.innerHTML = `<nav class="ui-tabs dk-subnav" aria-label="Decks">${[['/', 'decks', 'Decks'], ['/connect', 'connect', 'Connect your AI'], ['/settings', 'settings', 'Settings']].map(([h, k, l]) => `<a ${nav()} href="${hp}${h === '/' ? '' : h}" role="tab" aria-selected="${current === k}">${l}</a>`).join('')}</nav><div id="view"></div>`;
+      el.removeAttribute('aria-busy');
+      return;
+    }
     host.className = 'decks-app ui-shell';
-    const link = (href, key, icon, label) => `<a ${nav()} href="#${href}" data-nav="${key}"${current === key ? ' aria-current="page"' : ''}>${ic(icon, 18)}<span>${label}</span></a>`;
     host.innerHTML = `
     <aside class="ui-side" aria-label="Decks">
-      <a ${nav()} class="ui-brand dk-brand" href="${hp}/"><span class="dk-mark">${ic('screen', 15)}</span><span>${esc(ctx.team ?? S.settings?.team?.name ?? 'Decks')}</span></a>
+      <a ${nav()} class="ui-brand dk-brand" href="${hp}/"><span class="dk-mark">${ic('screen', 15)}</span><span>${esc(teamName)}</span></a>
       <nav class="ui-side-nav">${link('/', 'decks', 'grid', 'Decks')}${link('/connect', 'connect', 'spark', 'Connect your AI')}${link('/settings', 'settings', 'gear', 'Settings')}</nav>
-      ${ctx.standalone ? `<div class="ui-side-low"><a class="ui-side-me" ${nav('opens the public front page')} href="/" target="_blank" rel="noopener"><span class="ui-avatar is-sm" data-tone="2">${esc((S.settings?.me?.name ?? '?')[0])}</span><span>${esc(S.settings?.me?.name ?? '')}<small>Host it yourself, free</small></span></a></div>` : ''}
+      <div class="ui-side-low"><a class="ui-side-me" ${nav('opens the public front page')} href="/" target="_blank" rel="noopener"><span class="ui-avatar is-sm" data-tone="2">${esc((S.settings?.me?.name ?? '?')[0])}</span><span>${esc(S.settings?.me?.name ?? '')}<small>Host it yourself, free</small></span></a></div>
     </aside>
     <div class="ui-main">
       <header class="ui-topbar"><a ${nav()} class="ui-brand dk-brand" href="${hp}/"><span class="dk-mark">${ic('screen', 14)}</span><span>Decks</span></a><a ${nav()} class="ui-btn is-ghost is-sm" href="${hp}/connect">${ic('spark')}<span>Connect AI</span></a></header>

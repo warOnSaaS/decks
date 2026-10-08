@@ -51,7 +51,8 @@
       "FILES_MAX_MB",
       "CHROMIUM_PATH",
       "CRM_URL",
-      "WOS_ACCOUNT_URL"
+      "WOS_ACCOUNT_URL",
+      "WOS_DEMO"
     ]
   },
   "data": {

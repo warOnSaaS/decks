@@ -477,3 +477,9 @@ body.dapp{margin:0;background:var(--ui-bg);color:var(--ui-ink);font-family:var(-
   .dlg-looks{grid-template-columns:repeat(2,1fr)}
   .hide-sm{display:none!important}
 }
+
+/* inside the suite: no rail of our own, tabs at the top, the editor fills the suite's frame */
+.decks-app.is-suite{min-height:100%}
+.dk-subnav{padding:0 clamp(16px,3.4vw,44px);border-bottom:1px solid var(--ui-line)}
+.dk-subnav a{text-decoration:none}
+.decks-app.is-suite .ed{height:calc(100svh - 0px);max-height:100%}
